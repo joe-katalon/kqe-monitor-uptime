@@ -22,3 +22,23 @@
     at async RedBeanNode.normalizeRaw (/Users/lap14631-local/chauduong/08_Source_Codes/uptime-kuma/node_modules/redbean-node/dist/redbean-node.js:588:22)
     at async Teams._getTags (/Users/lap14631-local/chauduong/08_Source_Codes/uptime-kuma/server/notification-providers/teams.js:44:16)
     at async Teams._notificationPayloadFactory (/Users/lap14631-local/chauduong/08_Source_Codes/uptime-kuma/server/notification-providers/teams.js:70:26)
+[2025-05-29 21:25:42] ReferenceError: getEnvPlaceholderValues is not defined
+    at beat (/Users/chau.duong/JOE/myworkspace/kqe-monitor-uptime/server/model/monitor.js:231:39)
+    at safeBeat (/Users/chau.duong/JOE/myworkspace/kqe-monitor-uptime/server/model/monitor.js:892:23)
+    at Proxy.start (/Users/chau.duong/JOE/myworkspace/kqe-monitor-uptime/server/model/monitor.js:911:13)
+    at startMonitors (/Users/chau.duong/JOE/myworkspace/kqe-monitor-uptime/server/server.js:1778:17)
+[2025-05-29 21:26:42] ReferenceError: getEnvPlaceholderValues is not defined
+    at beat (/Users/chau.duong/JOE/myworkspace/kqe-monitor-uptime/server/model/monitor.js:231:39)
+    at Timeout.safeBeat [as _onTimeout] (/Users/chau.duong/JOE/myworkspace/kqe-monitor-uptime/server/model/monitor.js:892:23)
+    at listOnTimeout (node:internal/timers:608:17)
+    at process.processTimers (node:internal/timers:543:7)
+[2025-05-29 21:27:42] ReferenceError: getEnvPlaceholderValues is not defined
+    at beat (/Users/chau.duong/JOE/myworkspace/kqe-monitor-uptime/server/model/monitor.js:231:39)
+    at Timeout.safeBeat [as _onTimeout] (/Users/chau.duong/JOE/myworkspace/kqe-monitor-uptime/server/model/monitor.js:892:23)
+    at listOnTimeout (node:internal/timers:608:17)
+    at process.processTimers (node:internal/timers:543:7)
+[2025-05-29 21:28:42] ReferenceError: getEnvPlaceholderValues is not defined
+    at beat (/Users/chau.duong/JOE/myworkspace/kqe-monitor-uptime/server/model/monitor.js:231:39)
+    at Timeout.safeBeat [as _onTimeout] (/Users/chau.duong/JOE/myworkspace/kqe-monitor-uptime/server/model/monitor.js:892:23)
+    at listOnTimeout (node:internal/timers:608:17)
+    at process.processTimers (node:internal/timers:543:7)

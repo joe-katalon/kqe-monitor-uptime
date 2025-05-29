@@ -1,5 +1,29 @@
 import { createRouter, createWebHistory } from "vue-router";
 
+// Placeholder auth guard function
+function auth(to, from, next) {
+    const root = router.app && router.app.$root;
+    const loggedInReactively = root && root.loggedIn;
+
+    // Check storage for a token. router.app might not be available on first load.
+    let storedToken = null;
+    try {
+        const storageType = localStorage.getItem('remember') === '0' ? sessionStorage : localStorage;
+        storedToken = storageType.getItem('token');
+    } catch (e) {
+        // LocalStorage might be disabled or unavailable (e.g., in some iframe contexts)
+        console.error("Could not access storage for auth check:", e);
+    }
+
+    // If loggedIn is true, or if there's a token (and it's not the special 'autoLogin' value for disabled auth)
+    if (loggedInReactively || (storedToken && storedToken !== 'autoLogin')) {
+        next(); // User is logged in or has a valid session token, proceed to the route
+    } else {
+        console.warn("User not authenticated (checked reactive state and token), redirecting to /");
+        next('/');
+    }
+}
+
 import EmptyLayout from "./layouts/EmptyLayout.vue";
 import Layout from "./layouts/Layout.vue";
 import Dashboard from "./pages/Dashboard.vue";
@@ -18,12 +42,14 @@ import NotFound from "./pages/NotFound.vue";
 import DockerHosts from "./components/settings/Docker.vue";
 import MaintenanceDetails from "./pages/MaintenanceDetails.vue";
 import ManageMaintenance from "./pages/ManageMaintenance.vue";
+import APIKeys from "./components/settings/APIKeys.vue";
 
 // Settings - Sub Pages
 import Appearance from "./components/settings/Appearance.vue";
 import General from "./components/settings/General.vue";
 const Notifications = () => import("./components/settings/Notifications.vue");
 import ReverseProxy from "./components/settings/ReverseProxy.vue";
+import Tags from "./components/settings/Tags.vue";
 import MonitorHistory from "./components/settings/MonitorHistory.vue";
 const Security = () => import("./components/settings/Security.vue");
 import Proxies from "./components/settings/Proxies.vue";
@@ -66,6 +92,10 @@ const routes = [
                                 ],
                             },
                             {
+                                path: "/clone/:id",
+                                component: EditMonitor,
+                            },
+                            {
                                 path: "/add",
                                 component: EditMonitor,
                             },
@@ -96,6 +126,10 @@ const routes = [
                                 component: ReverseProxy,
                             },
                             {
+                                path: "tags",
+                                component: Tags,
+                            },
+                            {
                                 path: "monitor-history",
                                 component: MonitorHistory,
                             },
@@ -108,8 +142,18 @@ const routes = [
                                 component: Security,
                             },
                             {
+                                path: "api-keys",
+                                component: APIKeys,
+                            },
+                            {
                                 path: "proxies",
                                 component: Proxies,
+                                beforeEnter: auth,
+                            },
+                            {
+                                path: "placeholders",
+                                component: () => import("./components/settings/Placeholders.vue"),
+                                beforeEnter: auth,
                             },
                             {
                                 path: "backup",

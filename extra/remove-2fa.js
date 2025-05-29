@@ -1,4 +1,4 @@
-console.log("== Uptime Katalon Remove 2FA Tool ==");
+console.log("== Uptime Kuma Remove 2FA Tool ==");
 console.log("Loading the database");
 
 const Database = require("../server/database");
@@ -43,6 +43,11 @@ const main = async () => {
     console.log("Finished.");
 };
 
+/**
+ * Ask question of user
+ * @param {string} question Question to ask
+ * @returns {Promise<string>} Users response
+ */
 function question(question) {
     return new Promise((resolve) => {
         rl.question(question, (answer) => {

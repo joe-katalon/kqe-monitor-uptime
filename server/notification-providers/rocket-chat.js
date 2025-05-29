@@ -22,16 +22,14 @@ class RocketChat extends NotificationProvider {
                 return okMsg;
             }
 
-            const time = heartbeatJSON["time"];
-
             let data = {
-                "text": "Uptime Katalon Alert",
+                "text": "Uptime Kuma Alert",
                 "channel": notification.rocketchannel,
                 "username": notification.rocketusername,
                 "icon_emoji": notification.rocketiconemo,
                 "attachments": [
                     {
-                        "title": "Uptime Katalon Alert *Time (UTC)*\n" + time,
+                        "title": `Uptime Kuma Alert *Time (${heartbeatJSON["timezone"]})*\n${heartbeatJSON["localDateTime"]}`,
                         "text": "*Message*\n" + msg,
                     }
                 ]

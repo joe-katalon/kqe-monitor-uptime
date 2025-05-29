@@ -185,7 +185,7 @@ describe("Test Discord Notification Provider", () => {
 
         await discordProvider.send(
             {
-                discordUsername: "Uptime Katalon",
+                discordUsername: "Uptime Kuma",
                 discordWebhookUrl: "https://discord.com",
             },
             "test message",

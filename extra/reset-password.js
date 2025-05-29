@@ -1,4 +1,4 @@
-console.log("== Uptime Katalon Reset Password Tool ==");
+console.log("== Uptime Kuma Reset Password Tool ==");
 
 const Database = require("../server/database");
 const { R } = require("redbean-node");
@@ -53,6 +53,11 @@ const main = async () => {
     console.log("Finished.");
 };
 
+/**
+ * Ask question of user
+ * @param {string} question Question to ask
+ * @returns {Promise<string>} Users response
+ */
 function question(question) {
     return new Promise((resolve) => {
         rl.question(question, (answer) => {

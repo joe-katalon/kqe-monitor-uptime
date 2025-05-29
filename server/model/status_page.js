@@ -3,7 +3,7 @@ const { R } = require("redbean-node");
 const cheerio = require("cheerio");
 const { UptimeKumaServer } = require("../uptime-kuma-server");
 const jsesc = require("jsesc");
-const Maintenance = require("./maintenance");
+const googleAnalytics = require("../google-analytics");
 
 class StatusPage extends BeanModel {
 
@@ -11,7 +11,7 @@ class StatusPage extends BeanModel {
      * Like this: { "test-uptime.kuma.pet": "default" }
      * @type {{}}
      */
-    static domainMappingList = {};
+    static domainMappingList = { };
 
     /**
      *
@@ -53,9 +53,17 @@ class StatusPage extends BeanModel {
 
         const head = $("head");
 
+        if (statusPage.googleAnalyticsTagId) {
+            let escapedGoogleAnalyticsScript = googleAnalytics.getGoogleAnalyticsScript(statusPage.googleAnalyticsTagId);
+            head.append($(escapedGoogleAnalyticsScript));
+        }
+
         // OG Meta Tags
-        head.append(`<meta property="og:title" content="${statusPage.title}" />`);
-        head.append(`<meta property="og:description" content="${description155}" />`);
+        let ogTitle = $("<meta property=\"og:title\" content=\"\" />").attr("content", statusPage.title);
+        head.append(ogTitle);
+
+        let ogDescription = $("<meta property=\"og:description\" content=\"\" />").attr("content", description155);
+        head.append(ogDescription);
 
         // Preload data
         // Add jsesc, fix https://github.com/louislam/uptime-kuma/issues/2186
@@ -105,6 +113,7 @@ class StatusPage extends BeanModel {
             let monitorGroup = await groupBean.toPublicJSON(showTags);
             publicGroupList.push(monitorGroup);
         }
+
         // Response
         return {
             config: await statusPage.toPublicJSON(),
@@ -224,6 +233,7 @@ class StatusPage extends BeanModel {
             customCSS: this.custom_css,
             footerText: this.footer_text,
             showPoweredBy: !!this.show_powered_by,
+            googleAnalyticsId: this.google_analytics_tag_id,
         };
     }
 
@@ -244,6 +254,7 @@ class StatusPage extends BeanModel {
             customCSS: this.custom_css,
             footerText: this.footer_text,
             showPoweredBy: !!this.show_powered_by,
+            googleAnalyticsId: this.google_analytics_tag_id,
         };
     }
 
@@ -278,19 +289,17 @@ class StatusPage extends BeanModel {
         try {
             const publicMaintenanceList = [];
 
-            let activeCondition = Maintenance.getActiveMaintenanceSQLCondition();
-            let maintenanceBeanList = R.convertToBeans("maintenance", await R.getAll(`
-                SELECT maintenance.*
-                FROM maintenance, maintenance_status_page msp, maintenance_timeslot
-                WHERE msp.maintenance_id = maintenance.id
-                    AND maintenance_timeslot.maintenance_id = maintenance.id
-                    AND msp.status_page_id = ?
-                    AND ${activeCondition}
-                ORDER BY maintenance.end_date
-            `, [statusPageId]));
+            let maintenanceIDList = await R.getCol(`
+                SELECT DISTINCT maintenance_id
+                FROM maintenance_status_page
+                WHERE status_page_id = ?
+            `, [ statusPageId ]);
 
-            for (const bean of maintenanceBeanList) {
-                publicMaintenanceList.push(await bean.toPublicJSON());
+            for (const maintenanceID of maintenanceIDList) {
+                let maintenance = UptimeKumaServer.getInstance().getMaintenance(maintenanceID);
+                if (maintenance && await maintenance.isUnderMaintenance()) {
+                    publicMaintenanceList.push(await maintenance.toPublicJSON());
+                }
             }
 
             return publicMaintenanceList;

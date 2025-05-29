@@ -27,6 +27,16 @@ class Mattermost extends NotificationProvider {
             }
 
             const mattermostIconEmoji = notification.mattermosticonemo;
+            let mattermostIconEmojiOnline = "";
+            let mattermostIconEmojiOffline = "";
+
+            if (mattermostIconEmoji && typeof mattermostIconEmoji === "string") {
+                const emojiArray = mattermostIconEmoji.split(" ");
+                if (emojiArray.length >= 2) {
+                    mattermostIconEmojiOnline = emojiArray[0];
+                    mattermostIconEmojiOffline = emojiArray[1];
+                }
+            }
             const mattermostIconUrl = notification.mattermosticonurl;
 
             if (heartbeatJSON["status"] === DOWN) {

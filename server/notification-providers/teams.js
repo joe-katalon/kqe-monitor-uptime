@@ -135,7 +135,7 @@ class Teams extends NotificationProvider {
           });
         } else {
           mentionDomain = tag["value"];
-          let mentionIDs = mentionDomain.trim().split(/\W+/);
+          let mentionIDs = mentionDomain.trim().split(/\s*[,;\s]\s*/);
           console.log("mentionIDs:" + JSON.stringify(mentionIDs));
           mentionEntities = this._setMentionEntities(mentionIDs, defaultDomain);
           mentionIDs.forEach((mentionID) => {
@@ -268,7 +268,7 @@ class Teams extends NotificationProvider {
                 size: "Default",
                 color: "Default",
                 weight: "Bolder",
-                text: "- [Production Environment Uptime](http://uptime.pqe.vnpay.vn/status/production)\r- [Sandbox Environment Uptime](http://uptime.pqe.vnpay.vn/status/qc-environment)\r- [Admin only- Manage Status](http://uptime.pqe.vnpay.vn/manage-status-page)",
+                text: "- [Production Environment Uptime](http://uptime.Katalon.vn/status/production)\r- [Sandbox Environment Uptime](http://uptime.pqe.Katalon.vn/status/qc-environment)\r- [Admin only- Manage Status](http://uptime.pqe.Katalon.vn/manage-status-page)",
                 type: "TextBlock",
                 wrap: true,
                 separator: false,

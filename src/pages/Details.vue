@@ -1,14 +1,15 @@
 <template>
     <transition name="slide-fade" appear>
         <div v-if="monitor">
+            <router-link v-if="group !== ''" :to="monitorURL(monitor.parent)"> {{ group }}</router-link>
             <h1> {{ monitor.name }}</h1>
+            <p v-if="monitor.description">{{ monitor.description }}</p>
             <div class="tags">
                 <Tag v-for="tag in monitor.tags" :key="tag.id" :item="tag" :size="'sm'" />
             </div>
             <p class="url">
-                <a v-if="monitor.type === 'http' || monitor.type === 'keyword'" :href="monitor.url" target="_blank"
-                    rel="noopener noreferrer">{{ monitor.url }}</a>
-                <span v-if="monitor.type === 'port'">TCP Ping {{ monitor.hostname }}:{{ monitor.port }}</span>
+                <a v-if="monitor.type === 'http' || monitor.type === 'keyword' || monitor.type === 'mp-health' " :href="monitor.url" target="_blank" rel="noopener noreferrer">{{ filterPassword(monitor.url) }}</a>
+                <span v-if="monitor.type === 'port'">TCP Port {{ monitor.hostname }}:{{ monitor.port }}</span>
                 <span v-if="monitor.type === 'ping'">Ping: {{ monitor.hostname }}</span>
                 <span v-if="monitor.type === 'keyword'">
                     <br>
@@ -18,6 +19,21 @@
                     <br>
                     <span>{{ $t("Last Result") }}:</span> <span class="keyword">{{ monitor.dns_last_result }}</span>
                 </span>
+                <span v-if="monitor.type === 'docker'">Docker container: {{ monitor.docker_container }}</span>
+                <span v-if="monitor.type === 'gamedig'">Gamedig - {{ monitor.game }}: {{ monitor.hostname }}:{{ monitor.port }}</span>
+                <span v-if="monitor.type === 'grpc-keyword'">gRPC - {{ filterPassword(monitor.grpcUrl) }}
+                    <br>
+                    <span>{{ $t("Keyword") }}:</span> <span class="keyword">{{ monitor.keyword }}</span>
+                </span>
+                <span v-if="monitor.type === 'mongodb'">{{ filterPassword(monitor.databaseConnectionString) }}</span>
+                <span v-if="monitor.type === 'mqtt'">MQTT: {{ monitor.hostname }}:{{ monitor.port }}/{{ monitor.mqttTopic }}</span>
+                <span v-if="monitor.type === 'mysql'">{{ filterPassword(monitor.databaseConnectionString) }}</span>
+                <span v-if="monitor.type === 'postgres'">{{ filterPassword(monitor.databaseConnectionString) }}</span>
+                <span v-if="monitor.type === 'push'">Push: <a :href="pushURL" target="_blank" rel="noopener noreferrer">{{ pushURL }}</a></span>
+                <span v-if="monitor.type === 'radius'">Radius: {{ filterPassword(monitor.hostname) }}</span>
+                <span v-if="monitor.type === 'redis'">{{ filterPassword(monitor.databaseConnectionString) }}</span>
+                <span v-if="monitor.type === 'sqlserver'">SQL Server: {{ filterPassword(monitor.databaseConnectionString) }}</span>
+                <span v-if="monitor.type === 'steam'">Steam Game Server: {{ monitor.hostname }}:{{ monitor.port }}</span>
             </p>
 
             <div class="functions">
@@ -25,11 +41,14 @@
                     <button v-if="monitor.active" class="btn btn-normal" @click="pauseDialog">
                         <font-awesome-icon icon="pause" /> {{ $t("Pause") }}
                     </button>
-                    <button v-if="!monitor.active" class="btn btn-primary" @click="resumeMonitor">
+                    <button v-if="! monitor.active" class="btn btn-primary" :disabled="monitor.forceInactive" @click="resumeMonitor">
                         <font-awesome-icon icon="play" /> {{ $t("Resume") }}
                     </button>
-                    <router-link :to="'/edit/' + monitor.id" class="btn btn-normal">
+                    <router-link :to=" '/edit/' + monitor.id " class="btn btn-normal">
                         <font-awesome-icon icon="edit" /> {{ $t("Edit") }}
+                    </router-link>
+                    <router-link :to=" '/clone/' + monitor.id " class="btn btn-normal">
+                        <font-awesome-icon icon="clone" /> {{ $t("Clone") }}
                     </router-link>
                     <button class="btn btn-danger" @click="deleteDialog">
                         <font-awesome-icon icon="trash" /> {{ $t("Delete") }}
@@ -41,65 +60,52 @@
                 <div class="row">
                     <div class="col-md-8">
                         <HeartbeatBar :monitor-id="monitor.id" />
-                        <span class="word">{{ $t("checkEverySecond", [monitor.interval]) }}</span>
+                        <span class="word">{{ $t("checkEverySecond", [ monitor.interval ]) }}</span>
                     </div>
                     <div class="col-md-4 text-center">
-                        <span class="badge rounded-pill" :class="'bg-' + status.color" style="font-size: 30px;">{{
-                                status.text
-                        }}</span>
+                        <span class="badge rounded-pill" :class=" 'bg-' + status.color " style="font-size: 30px;">{{ status.text }}</span>
                     </div>
                 </div>
             </div>
 
             <div class="shadow-box big-padding text-center stats">
                 <div class="row">
-                    <div class="col">
-                        <h4>{{ pingTitle() }}</h4>
-                        <p>({{ $t("Current") }})</p>
-                        <span class="num">
+                    <div v-if="monitor.type !== 'group'" class="col-12 col-sm col row d-flex align-items-center d-sm-block">
+                        <h4 class="col-4 col-sm-12">{{ pingTitle() }}</h4>
+                        <p class="col-4 col-sm-12 mb-0 mb-sm-2">({{ $t("Current") }})</p>
+                        <span class="col-4 col-sm-12 num">
                             <a href="#" @click.prevent="showPingChartBox = !showPingChartBox">
                                 <CountUp :value="ping" />
                             </a>
                         </span>
                     </div>
-                    <div class="col">
-                        <h4>{{ pingTitle(true) }}</h4>
-                        <p>(24{{ $t("-hour") }})</p>
-                        <span class="num">
+                    <div v-if="monitor.type !== 'group'" class="col-12 col-sm col row d-flex align-items-center d-sm-block">
+                        <h4 class="col-4 col-sm-12">{{ pingTitle(true) }}</h4>
+                        <p class="col-4 col-sm-12 mb-0 mb-sm-2">(24{{ $t("-hour") }})</p>
+                        <span class="col-4 col-sm-12 num">
                             <CountUp :value="avgPing" />
                         </span>
                     </div>
-                    <div class="col">
-                        <h4>{{ $t("Uptime") }}</h4>
-                        <p>(24{{ $t("-hour") }})</p>
-                        <span class="num">
+                    <div class="col-12 col-sm col row d-flex align-items-center d-sm-block">
+                        <h4 class="col-4 col-sm-12">{{ $t("Uptime") }}</h4>
+                        <p class="col-4 col-sm-12 mb-0 mb-sm-2">(24{{ $t("-hour") }})</p>
+                        <span class="col-4 col-sm-12 num">
                             <Uptime :monitor="monitor" type="24" />
                         </span>
                     </div>
-                    <div class="col">
-                        <h4>{{ $t("Uptime") }}</h4>
-                        <p>(7{{ $t("-day") }})</p>
-                        <span class="num">
-                            <Uptime :monitor="monitor" type="168" />
-                        </span>
-                    </div>
-                    <div class="col">
-                        <h4>{{ $t("Uptime") }}</h4>
-                        <p>(30{{ $t("-day") }})</p>
-                        <span class="num">
+                    <div class="col-12 col-sm col row d-flex align-items-center d-sm-block">
+                        <h4 class="col-4 col-sm-12">{{ $t("Uptime") }}</h4>
+                        <p class="col-4 col-sm-12 mb-0 mb-sm-2">(30{{ $t("-day") }})</p>
+                        <span class="col-4 col-sm-12 num">
                             <Uptime :monitor="monitor" type="720" />
                         </span>
                     </div>
 
-                    <div v-if="tlsInfo" class="col">
-                        <h4>{{ $t("Cert Exp.") }}</h4>
-                        <p>(
-                            <Datetime :value="tlsInfo.certInfo.validTo" date-only />)
-                        </p>
-                        <span class="num">
-                            <a href="#" @click.prevent="toggleCertInfoBox = !toggleCertInfoBox">{{
-                                    tlsInfo.certInfo.daysRemaining
-                            }} {{ $tc("day", tlsInfo.certInfo.daysRemaining) }}</a>
+                    <div v-if="tlsInfo" class="col-12 col-sm col row d-flex align-items-center d-sm-block">
+                        <h4 class="col-4 col-sm-12">{{ $t("Cert Exp.") }}</h4>
+                        <p class="col-4 col-sm-12 mb-0 mb-sm-2">(<Datetime :value="tlsInfo.certInfo.validTo" date-only />)</p>
+                        <span class="col-4 col-sm-12 num">
+                            <a href="#" @click.prevent="toggleCertInfoBox = !toggleCertInfoBox">{{ tlsInfo.certInfo.daysRemaining }} {{ $tc("day", tlsInfo.certInfo.daysRemaining) }}</a>
                         </span>
                     </div>
                 </div>
@@ -127,8 +133,7 @@
 
             <div class="shadow-box table-shadow-box">
                 <div class="dropdown dropdown-clear-data">
-                    <button class="btn btn-sm btn-outline-danger dropdown-toggle" type="button"
-                        data-bs-toggle="dropdown">
+                    <button class="btn btn-sm btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <font-awesome-icon icon="trash" /> {{ $t("Clear Data") }}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -153,14 +158,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(beat, index) in displayedRecords" :key="index"
-                            :class="{ 'shadow-box': $root.windowWidth <= 550 }" style="padding: 10px;">
-                            <td>
-                                <Status :status="beat.status" />
-                            </td>
-                            <td :class="{ 'border-0': !beat.msg }">
-                                <Datetime :value="beat.time" />
-                            </td>
+                        <tr v-for="(beat, index) in displayedRecords" :key="index" style="padding: 10px;">
+                            <td><Status :status="beat.status" /></td>
+                            <td :class="{ 'border-0':! beat.msg}"><Datetime :value="beat.time" /></td>
                             <td class="border-0">{{ beat.msg }}</td>
                         </tr>
 
@@ -173,8 +173,12 @@
                 </table>
 
                 <div class="d-flex justify-content-center kuma_pagination">
-                    <pagination v-model="page" :records="importantHeartBeatList.length" :per-page="perPage"
-                        :options="paginationConfig" />
+                    <pagination
+                        v-model="page"
+                        :records="importantHeartBeatList.length"
+                        :per-page="perPage"
+                        :options="paginationConfig"
+                    />
                 </div>
             </div>
 
@@ -182,18 +186,15 @@
                 {{ $t("pauseMonitorMsg") }}
             </Confirm>
 
-            <Confirm ref="confirmDelete" btn-style="btn-danger" :yes-text="$t('Yes')" :no-text="$t('No')"
-                @yes="deleteMonitor">
+            <Confirm ref="confirmDelete" btn-style="btn-danger" :yes-text="$t('Yes')" :no-text="$t('No')" @yes="deleteMonitor">
                 {{ $t("deleteMonitorMsg") }}
             </Confirm>
 
-            <Confirm ref="confirmClearEvents" btn-style="btn-danger" :yes-text="$t('Yes')" :no-text="$t('No')"
-                @yes="clearEvents">
+            <Confirm ref="confirmClearEvents" btn-style="btn-danger" :yes-text="$t('Yes')" :no-text="$t('No')" @yes="clearEvents">
                 {{ $t("clearEventsMsg") }}
             </Confirm>
 
-            <Confirm ref="confirmClearHeartbeats" btn-style="btn-danger" :yes-text="$t('Yes')" :no-text="$t('No')"
-                @yes="clearHeartbeats">
+            <Confirm ref="confirmClearHeartbeats" btn-style="btn-danger" :yes-text="$t('Yes')" :no-text="$t('No')" @yes="clearHeartbeats">
                 {{ $t("clearHeartbeatsMsg") }}
             </Confirm>
         </div>
@@ -214,6 +215,8 @@ import Pagination from "v-pagination-3";
 const PingChart = defineAsyncComponent(() => import("../components/PingChart.vue"));
 import Tag from "../components/Tag.vue";
 import CertificateInfo from "../components/CertificateInfo.vue";
+import { getMonitorRelativeURL } from "../util.ts";
+import { URL } from "whatwg-url";
 
 export default {
     components: {
@@ -288,7 +291,7 @@ export default {
                 return this.$root.statusList[this.monitor.id];
             }
 
-            return {};
+            return { };
         },
 
         tlsInfo() {
@@ -310,6 +313,17 @@ export default {
             const startIndex = this.perPage * (this.page - 1);
             const endIndex = startIndex + this.perPage;
             return this.heartBeatList.slice(startIndex, endIndex);
+        },
+
+        group() {
+            if (!this.monitor.pathName.includes("/")) {
+                return "";
+            }
+            return this.monitor.pathName.substr(0, this.monitor.pathName.lastIndexOf("/"));
+        },
+
+        pushURL() {
+            return this.$root.baseURL + "/api/push/" + this.monitor.pushToken + "?status=up&msg=OK&ping=";
         },
     },
     mounted() {
@@ -371,7 +385,7 @@ export default {
         /** Request that this monitors events are cleared */
         clearEvents() {
             this.$root.clearEvents(this.monitor.id, (res) => {
-                if (!res.ok) {
+                if (! res.ok) {
                     toast.error(res.msg);
                 }
             });
@@ -380,7 +394,7 @@ export default {
         /** Request that this monitors heartbeats are cleared */
         clearHeartbeats() {
             this.$root.clearHeartbeats(this.monitor.id, (res) => {
-                if (!res.ok) {
+                if (! res.ok) {
                     toast.error(res.msg);
                 }
             });
@@ -397,12 +411,35 @@ export default {
                 translationPrefix = "Avg. ";
             }
 
-            if (this.monitor.type === "http") {
+            if (this.monitor.type === "http" || this.monitor.type === "keyword") {
                 return this.$t(translationPrefix + "Response");
             }
 
             return this.$t(translationPrefix + "Ping");
         },
+
+        /**
+         * Get URL of monitor
+         * @param {number} id ID of monitor
+         * @returns {string} Relative URL of monitor
+         */
+        monitorURL(id) {
+            return getMonitorRelativeURL(id);
+        },
+
+        /** Filter and hide password in URL for display */
+        filterPassword(urlString) {
+            try {
+                let parsedUrl = new URL(urlString);
+                if (parsedUrl.password !== "") {
+                    parsedUrl.password = "******";
+                }
+                return parsedUrl.toString();
+            } catch (e) {
+                // Handle SQL Server
+                return urlString.replaceAll(/Password=(.+);/ig, "Password=******;");
+            }
+        }
     },
 };
 </script>
@@ -436,6 +473,7 @@ export default {
         flex-direction: column;
         align-items: center;
         padding-top: 10px;
+        font-size: 0.9em;
     }
 
     a.btn {
@@ -492,12 +530,30 @@ table {
     }
 }
 
+@media (max-width: 550px) {
+    .stats {
+        .col {
+            margin: 10px 0 !important;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+        }
+    }
+}
+
 .keyword {
     color: black;
 }
 
 .dropdown-clear-data {
     float: right;
+
+    ul {
+        width: 100%;
+        min-width: unset;
+        padding-left: 0;
+    }
 }
 
 .dark {
@@ -526,7 +582,8 @@ table {
     margin-bottom: 0.5rem;
 }
 
-.tags>div:first-child {
+.tags > div:first-child {
     margin-left: 0 !important;
 }
+
 </style>

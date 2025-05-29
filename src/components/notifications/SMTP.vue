@@ -39,7 +39,7 @@
 
         <div class="mb-3">
             <label for="from-email" class="form-label">{{ $t("From Email") }}</label>
-            <input id="from-email" v-model="$parent.notification.smtpFrom" type="text" class="form-control" required autocomplete="false" placeholder="&quot;Uptime Katalon&quot; &lt;example@kuma.pet&gt;">
+            <input id="from-email" v-model="$parent.notification.smtpFrom" type="text" class="form-control" required autocomplete="false" placeholder="&quot;Uptime Kuma&quot; &lt;example@kuma.pet&gt;">
             <div class="form-text">
             </div>
         </div>
@@ -97,7 +97,6 @@
                 (leave blank for default one)<br />
                 {{NAME}}: Service Name<br />
                 {{HOSTNAME_OR_URL}}: Hostname or URL<br />
-                {{URL}}: URL<br />
                 {{STATUS}}: Status<br />
             </div>
         </div>

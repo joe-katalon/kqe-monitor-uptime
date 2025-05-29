@@ -16,9 +16,9 @@
                 <span class="fs-4 title">{{ $t("Uptime Katalon") }}</span>
             </router-link>
 
-            <a v-if="hasNewVersion" target="_blank" href="https://github.com/louislam/uptime-kuma/releases" class="btn btn-info me-3">
-                <font-awesome-icon icon="arrow-alt-circle-up" /> {{ $t("New Update") }}
-            </a>
+            <!-- <a v-if="hasNewVersion" target="_blank" href="https://github.com/louislam/uptime-kuma/releases" class="btn btn-info me-3">
+                <font-awesome-icon icon="arrow-alt-circle-up" /> {{ $t("New Update XXXXX") }}
+            </a> -->
 
             <ul class="nav nav-pills">
                 <li v-if="$root.loggedIn" class="nav-item me-2">
@@ -63,6 +63,12 @@
                                 </router-link>
                             </li>
 
+                            <li>
+                                <a href="https://github.com/louislam/uptime-kuma/wiki" class="dropdown-item" target="_blank">
+                                    <font-awesome-icon icon="info-circle" /> {{ $t("Help") }}
+                                </a>
+                            </li>
+
                             <li v-if="$root.loggedIn && $root.socket.token !== 'autoLogin'">
                                 <button class="dropdown-item" @click="$root.logout">
                                     <font-awesome-icon icon="sign-out-alt" />
@@ -89,7 +95,7 @@
         </main>
 
         <!-- Mobile Only -->
-        <div v-if="$root.isMobile" style="width: 100%; height: 60px;" />
+        <div v-if="$root.isMobile" style="width: 100%; height: calc(60px + env(safe-area-inset-bottom));" />
         <nav v-if="$root.isMobile && $root.loggedIn" class="bottom-nav">
             <router-link to="/dashboard" class="nav-link">
                 <div><font-awesome-icon icon="tachometer-alt" /></div>
@@ -176,14 +182,14 @@ export default {
     z-index: 1000;
     position: fixed;
     bottom: 0;
-    height: 60px;
+    height: calc(60px + env(safe-area-inset-bottom));
     width: 100%;
     left: 0;
     background-color: #fff;
     box-shadow: 0 15px 47px 0 rgba(0, 0, 0, 0.05), 0 5px 14px 0 rgba(0, 0, 0, 0.05);
     text-align: center;
     white-space: nowrap;
-    padding: 0 10px;
+    padding: 0 10px env(safe-area-inset-bottom);
 
     a {
         text-align: center;

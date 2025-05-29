@@ -177,5 +177,3 @@ Feel free to correct my grammar in this README, source code, or wiki, as my moth
 
 ### Create Pull Requests
 If you want to modify Uptime Katalon, please read this guide and follow the rules here: https://github.com/louislam/uptime-kuma/blob/master/CONTRIBUTING.md
-# kqe-monitor-uptime
-# kqe-monitor-uptime
