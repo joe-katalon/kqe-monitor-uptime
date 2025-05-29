@@ -1,0 +1,7 @@
+docker build -t uptimepqe -f docker/dockerfile .
+
+# tag and push to docker hub 
+# TODO: move to local repositories Nexus
+docker tag uptimepqe tienmn/uptimepqe:1.0.8
+
+docker push tienmn/uptimepqe:1.0.8
