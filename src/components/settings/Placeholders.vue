@@ -1,6 +1,5 @@
 <template>
     <div class="p-4">
-        <h2 class="text-2xl font-semibold mb-4">{{ $t("Request Placeholders") }}</h2>
         <p class="mb-6 text-gray-600">{{ $t("Manage global placeholders that can be used in your HTTP monitor request bodies and headers. Use '{'{placeholder_key}'}' in your monitor configuration.") }}</p>
 
         <!-- Form to Add New Placeholder -->
@@ -9,15 +8,16 @@
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="placeholderKey">
                     {{ $t("Placeholder Key") }}
-                </label>
+                </label><br />
                 <input v-model="newPlaceholder.key" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="placeholderKey" type="text" :placeholder="$t('e.g., MY_API_TOKEN')">
             </div>
             <div class="mb-6">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="placeholderValue">
                     {{ $t("Placeholder Value") }}
-                </label>
+                </label><br />
                 <input v-model="newPlaceholder.value" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="placeholderValue" type="text" :placeholder="$t('e.g., abc123xyz')">
             </div>
+            <br />
             <div class="flex items-center justify-between">
                 <button @click="addPlaceholder" class="btn btn-primary me-2" type="button">
                     {{ $t("Add Placeholder") }}
@@ -25,6 +25,7 @@
             </div>
         </div>
 
+        <br />
         <!-- List of Existing Placeholders -->
         <div>
             <h3 class="text-xl font-semibold mb-4">{{ $t("Existing Placeholders") }}</h3>

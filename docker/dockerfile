@@ -4,7 +4,7 @@ WORKDIR /app
 # Copy app files from build layer
 COPY . .
 
-RUN npm ci --legacy-peer-deps && npm run build && chmod +x /app/extra/entrypoint.sh
+RUN npm install --legacy-peer-deps && npm run build && chmod +x /app/extra/entrypoint.sh
 
 EXPOSE 3001
 VOLUME ["/app/data"]
