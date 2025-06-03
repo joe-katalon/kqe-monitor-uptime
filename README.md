@@ -1,3 +1,15 @@
+# Chau Guideline:
+- Remove node-modules & packages log json
+- Try to run:
+  - npm install --legacy-peer-deps 
+  - npm run dev (for development when you need to modify source code and see effect immediately) or node server/server.js after finishing development mode and launching production
+- How to build image and push to docker hub:
+  - Check dockerfile 
+  - docker build --platform linux/amd64 -t kqe-uptime-joe:latest -f docker/dockerfile . 
+  - (note that --platform linux/amd64 would be use for AWS EC2, double check for base OS of docker run)
+  - docker tag kqe-uptime-joe joemr/kqe-uptime-joe:1.0.3
+  - docker push joemr/kqe-uptime-joe:1.0.3
+
 # Uptime Katalon
 
 <a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/stars/louislam/uptime-kuma" /></a> <a target="_blank" href="https://hub.docker.com/r/louislam/uptime-kuma"><img src="https://img.shields.io/docker/pulls/louislam/uptime-kuma" /></a> <a target="_blank" href="https://hub.docker.com/r/louislam/uptime-kuma"><img src="https://img.shields.io/docker/v/louislam/uptime-kuma/latest?label=docker%20image%20ver." /></a> <a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/last-commit/louislam/uptime-kuma" /></a>  <a target="_blank" href="https://opencollective.com/uptime-kuma"><img src="https://opencollective.com/uptime-kuma/total/badge.svg?label=Open%20Collective%20Backers&color=brightgreen" /></a>
