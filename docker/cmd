@@ -5,3 +5,6 @@ docker build -t uptimepqe -f docker/dockerfile .
 docker tag uptimepqe tienmn/uptimepqe:1.0.8
 
 docker push tienmn/uptimepqe:1.0.8
+
+# JOE
+docker build -t kqe-uptime-joe -f docker/dockerfile .
